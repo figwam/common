@@ -202,8 +202,8 @@ CREATE TABLE public.subscription(
 	id uuid primary key NOT NULL DEFAULT uuid_generate_v4(),
 	created_on timestamp NOT NULL DEFAULT NOW(),
 	updated_on timestamp NOT NULL DEFAULT NOW(),
-	is_active bool NOT NULL DEFAULT true,
 	canceled_on timestamp,
+	deleted_on timestamp,
 	id_offer uuid NOT NULL,
 	id_trainee uuid NOT NULL
 );

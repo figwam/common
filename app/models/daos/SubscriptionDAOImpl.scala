@@ -1,24 +1,33 @@
 package models.daos
 
+import java.sql.Timestamp
 import java.util.UUID
 import javax.inject.Inject
 
 import models._
+import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
-import play.libs.Json
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import utils.Utils._
 
 import utils.Utils._
-trait SubscriptionDAO  {
+
+trait SubscriptionDAO {
 
   //def listByTrainee(idTrainee: UUID): Future[List[String]]
 
+  def retrieve(idSubscription: UUID): Future[Subscription]
+
+  def cancel(idSubscription: UUID, deletedOn: Timestamp, canceledOn: Timestamp): Future[Int]
+
+
 }
 
-class SubscriptionDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
+class SubscriptionDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
   extends SubscriptionDAO with DAOSlick {
+
   import driver.api._
 
   /*
@@ -83,4 +92,25 @@ class SubscriptionDAOImpl @Inject() (protected val dbConfigProvider: DatabaseCon
 
 
   } */
+  override def cancel(idSubscription: UUID, deletedOn: Timestamp, canceledOn: Timestamp): Future[Int] = {
+    val q = for {s <- slickSubscriptions if s.id === idSubscription if s.deletedOn.isEmpty} yield (s.deletedOn, s.canceledOn, s.updatedOn)
+    db.run(q.update(Some(deletedOn), Some(canceledOn), canceledOn))
+  }
+
+  override def retrieve(idSubscription: UUID): Future[Subscription] = {
+    val q = for {
+      s <- slickSubscriptions.filter(_.id === idSubscription)
+    } yield s
+
+    db.run(q.result.head).map {
+      case (subscription) =>
+        Subscription(
+          subscription.id,
+          asCalendar(subscription.createdOn),
+          calculatePeriods(asCalendar(subscription.createdOn)).last,
+          subscription.canceledOn match { case Some(c) => Some(asCalendar(c)) case _ => None },
+          subscription.deletedOn match { case Some(c) => Some(asCalendar(c)) case _ => None }
+        )
+    }
+  }
 }

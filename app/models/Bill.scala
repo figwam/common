@@ -12,8 +12,7 @@ case class Bill(
                   vat: scala.math.BigDecimal,
                   periodStart: Calendar,
                   periodEnd: Calendar,
-                  paidAt: Option[Calendar],
-                  idTrainee: Long)
+                  paidAt: Option[Calendar])
 
 /**
  * The companion object.

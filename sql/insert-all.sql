@@ -145,14 +145,23 @@ BEGIN
       INSERT INTO trainee_password_info (id_login_info, hasher, password)
         SELECT id, 'bcrypt', '$2a$10$IJsMs8yzNR4Twwh1JpQBUej8bKRUtnOLX2IVVU9JiGN06ru2keyLy'
         FROM lin02
-    )
-    INSERT INTO subscription(id_offer, id_trainee)
+    ), sub01 AS(
+      INSERT INTO subscription(id_offer, id_trainee)
         SELECT o.id, t.id
         FROM tra01 t, offer o
-        WHERE o.nr_access = ((i-1)*2)+4;
+        WHERE o.nr_access = ((i-1)*2)+4
+      RETURNING id
+    ), bil01 AS(INSERT INTO bill(id_subscription, amount, vat, period_start, period_end, paid_at, payment_transaction_id,payment_status)
+        SELECT id, 59, 4.72, current_timestamp - 2 * interval '1 month', current_timestamp - 1 * interval '1 month', NOW(), 'transaction_id_1234', 'paid'
+        FROM sub01
+    ), bil02 AS(INSERT INTO bill(id_subscription, amount, vat, period_start, period_end, paid_at, payment_transaction_id,payment_status)
+        SELECT id, 59, 4.72, current_timestamp - 3 * interval '1 month', current_timestamp - 2 * interval '1 month', NOW(), 'transaction_id_1234', 'paid'
+        FROM sub01
+    )
+    INSERT INTO bill(id_subscription, amount, vat, period_start, period_end, paid_at, payment_transaction_id,payment_status)
+        SELECT id, 59, 4.72, NOW(), current_timestamp + 1 * interval '1 month', NOW(), 'transaction_id_1234', 'paid'
+        FROM sub01;
   END LOOP;
-
-
 END;
 $$;
 

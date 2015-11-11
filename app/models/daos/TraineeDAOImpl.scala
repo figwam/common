@@ -33,7 +33,8 @@ class TraineeDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigPro
       dbTraineeLoginInfo <- slickTraineeLoginInfos.filter(_.idLoginInfo === dbLoginInfo.id)
       dbTrainee <- slickTrainees.filter(_.id === dbTraineeLoginInfo.idTrainee)
       dbAddress <- slickAddresses.filter(_.id === dbTrainee.idAddress)
-      dbSubscription <- slickSubscriptions.filter(_.idTrainee === dbTrainee.id).filter(_.isActive === true)
+      dbSubscription <- slickSubscriptions.filter(_.idTrainee === dbTrainee.id)
+        if (dbSubscription.deletedOn.isEmpty || dbSubscription.deletedOn >= new Timestamp(System.currentTimeMillis())) // filter: Is the subscription cancceled bu still active
       dbOffer <- slickOffers.filter(_.id === dbSubscription.idOffer)
     } yield (dbTrainee, dbLoginInfo, dbAddress, dbSubscription, dbOffer)
     db.run(query.result.headOption).map { resultOption =>
@@ -65,17 +66,17 @@ class TraineeDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigPro
           None,
             Some(Subscription(
               subscription.id,
-              subscription.isActive,
               asCalendar(subscription.createdOn),
               calculatePeriods(asCalendar(subscription.createdOn)).last,
               subscription.canceledOn match { case Some(c) => Some(asCalendar(c)) case _ => None},
-              Offer(
+              subscription.deletedOn match { case Some(c) => Some(asCalendar(c)) case _ => None},
+              Some(Offer(
                 offer.id,
                 offer.name,
                 offer.nrAccess,
                 offer.price,
                 offer.priceTimestop,
-                asDatetime(offer.createdOn))
+                asDatetime(offer.createdOn)))
             ))
           )
       }
@@ -159,9 +160,27 @@ class TraineeDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigPro
       dbTraineeP <- slickTrainees.returning(slickTrainees.map(_.id)).insertOrUpdate(dbTrainee.copy(idAddress = address.id.get))
       loginInfo <- loginInfoAction
       _ <- slickTraineeLoginInfos += DBTraineeLoginInfo(new Timestamp(System.currentTimeMillis), dbTraineeP.head.get, loginInfo.id.get)
-      _ <- slickSubscriptions += DBSubscription(None, new Timestamp(System.currentTimeMillis), new Timestamp(System.currentTimeMillis), true, None, trainee.selectedOfferId.get, dbTraineeP.head.get)
+      _ <- slickSubscriptions += DBSubscription(None, new Timestamp(System.currentTimeMillis), new Timestamp(System.currentTimeMillis), None, None, trainee.selectedOfferId.get, dbTraineeP.head.get)
     } yield ()).transactionally
     // run actions and return trainee afterwards
+    db.run(actions).map(_ => trainee)
+  }
+
+
+
+  /**
+    * Updates a trainee.
+    *
+    * @param trainee The trainee to update.
+    * @return The updated trainee.
+    */
+  def update(trainee: Trainee): Future[Trainee] = {
+    val qT = for {t <- slickTrainees if t.id === trainee.id} yield (t.firstname, t.lastname, t.mobile, t.phone, t.updatedOn)
+    val qA = for {a <- slickAddresses if a.id === trainee.address.id} yield (a.street, a.city, a.zip, a.updatedOn)
+    val actions = (for {
+      updateT <- qT.update(trainee.firstname, trainee.lastname, trainee.mobile, trainee.phone, new Timestamp(System.currentTimeMillis))
+      updateA <- qA.update(trainee.address.street, trainee.address.city, trainee.address.zip, new Timestamp(System.currentTimeMillis))
+    } yield ()).transactionally
     db.run(actions).map(_ => trainee)
   }
 }

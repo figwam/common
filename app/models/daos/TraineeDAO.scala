@@ -28,4 +28,12 @@ trait TraineeDAO {
    * @return The saved trainee.
    */
   def save(trainee: Trainee): Future[Trainee]
+
+  /**
+    * Updates a trainee.
+    *
+    * @param trainee The trainee to update.
+    * @return The updated trainee.
+    */
+  def update(trainee: Trainee): Future[Trainee]
 }

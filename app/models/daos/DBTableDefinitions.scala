@@ -440,20 +440,20 @@ trait DBTableDefinitions {
     id: Option[UUID],
     createdOn: java.sql.Timestamp,
     updatedOn: java.sql.Timestamp,
-    isActive: Boolean = true,
     canceledOn: Option[java.sql.Timestamp] = None,
+    deletedOn: Option[java.sql.Timestamp] = None,
     idOffer: UUID,
     idTrainee: UUID
     )
 
 
   class Subscriptions(_tableTag: Tag) extends Table[DBSubscription](_tableTag, "subscription") {
-    def * = (id, createdOn, updatedOn, isActive, canceledOn, idOffer, idTrainee) <> (DBSubscription.tupled, DBSubscription.unapply)
+    def * = (id, createdOn, updatedOn, canceledOn, deletedOn, idOffer, idTrainee) <> (DBSubscription.tupled, DBSubscription.unapply)
     val id: Rep[Option[UUID]] = column[Option[UUID]]("id", O.PrimaryKey, O.AutoInc)
     val createdOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("created_on")
     val updatedOn: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("updated_on")
-    val isActive: Rep[Boolean] = column[Boolean]("is_active", O.Default(true))
     val canceledOn: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("canceled_on", O.Default(None))
+    val deletedOn: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("deleted_on", O.Default(None))
     val idOffer: Rep[UUID] = column[UUID]("id_offer")
     val idTrainee: Rep[UUID] = column[UUID]("id_trainee")
     lazy val offerFk = foreignKey("offer_fk", idOffer, slickOffers)(r => r.id.get, onUpdate=ForeignKeyAction.Cascade, onDelete=ForeignKeyAction.Restrict)
@@ -482,9 +482,9 @@ trait DBTableDefinitions {
   }
 
   case class DBTrainee(
-    id: Option[UUID],
-    firstname: Option[String],
-    lastname: Option[String],
+    id: Option[UUID] = None,
+    firstname: Option[String] = None,
+    lastname: Option[String] = None,
     mobile: Option[String] = None,
     phone: Option[String] = None,
     email: Option[String] = None,
