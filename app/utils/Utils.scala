@@ -8,6 +8,7 @@ import java.util.{GregorianCalendar, Calendar}
 import org.joda.time.format.{DateTimeFormatter, ISODateTimeFormat}
 import org.joda.time.{DateTimeZone, DateTime}
 import models.Recurrence.Recurrence
+import models.Type.Type
 import models._
 import play.Logger
 import play.api.libs.json._
@@ -51,6 +52,15 @@ object Utils {
         JsSuccess(Recurrence.withName(str))
       }
       def writes(r: Recurrence) = JsString(r+"")
+    }
+
+
+    implicit object typeFormat extends Format[Type] {
+      def reads(json: JsValue) = {
+        val str = json.as[String]
+        JsSuccess(Type.withName(str))
+      }
+      def writes(r: Type) = JsString(r+"")
     }
 
   }
@@ -97,7 +107,7 @@ object Utils {
     // activ bis muss in zukunft liegen ODER
     // activ von muss vor calculateTill
         clazzDef.recurrence match {
-          case (Recurrence.WEEKLY) => {
+          case (Recurrence.`weekly`) => {
             if (clazzDef.activeTill.after(now) && clazzDef.activeFrom.before(calculateTill)) {
               var clazzes = new ListBuffer[Clazz]
               while (clazz.startFrom.before(now)) addDays(clazz, 7)
@@ -116,7 +126,7 @@ object Utils {
               clazzes.toList
             } else List()
           }
-          case (Recurrence.ONETIME) => {
+          case (Recurrence.`onetime`) => {
             if (clazzDef.startFrom.after(now) && clazzDef.startFrom.before(calculateTill)) List(clazz) else List()
           }
           case _ => Logger.warn("Unknown Recurrence type in clazz definition with id=" + clazzDef.id); List()

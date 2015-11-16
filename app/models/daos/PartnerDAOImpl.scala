@@ -33,10 +33,12 @@ class PartnerDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigPro
       dbPartnerLoginInfo <- slickPartnerLoginInfos.filter(_.idLoginInfo === dbLoginInfo.id)
       dbPartner <- slickPartners.filter(_.id === dbPartnerLoginInfo.idPartner)
       dbAddress <- slickAddresses.filter(_.id === dbPartner.idAddress)
-    } yield (dbPartner, dbLoginInfo, dbAddress)
+      dbStudio <- slickStudios.filter(_.idPartner === dbPartner.id)
+      dbAddressS <- slickAddresses.filter(_.id === dbStudio.idAddress)
+    } yield (dbPartner, dbLoginInfo, dbAddress, dbStudio, dbAddressS)
     db.run(query.result.headOption).map { resultOption =>
       resultOption.map {
-        case (partner, loginInfo, address) =>
+        case (partner, loginInfo, address, studio, addressS) =>
           Partner(partner.id,
             LoginInfo(loginInfo.providerId, loginInfo.providerKey),
             partner.firstname,
@@ -45,8 +47,8 @@ class PartnerDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigPro
             partner.phone,
             partner.email,
             partner.emailVerified,
-            partner.createdOn,
-            partner.updatedOn,
+            asCalendar(partner.createdOn),
+            asCalendar(partner.updatedOn),
             partner.ptoken,
             partner.isActive,
             partner.inactiveReason,
@@ -59,7 +61,18 @@ class PartnerDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigPro
               address.city,
               address.zip,
               address.state,
-              address.country)
+              address.country),
+            Studio(
+              id=studio.id,
+              name=studio.name,
+              address=Address(
+                addressS.id,
+                addressS.street,
+                addressS.city,
+                addressS.zip,
+                addressS.state,
+                addressS.country)
+            )
           )
       }
     }

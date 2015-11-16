@@ -15,7 +15,7 @@ import utils.Utils.{asTimestamp, asCalendar}
 
 trait ClazzDefinitionDAO  {
 
-  def insert(clazz: ClazzDefinition): Future[ClazzDefinition]
+  def create(clazz: ClazzDefinition): Future[ClazzDefinition]
   //  def update(id: Long, clazz: ClazzDefinition): Future[Int]
   //  def delete(id: Long): Future[Int]
   def listActive(): Future[Seq[ClazzDefinition]]
@@ -47,19 +47,16 @@ class ClazzDefinitionDAOImpl @Inject() (protected val dbConfigProvider: Database
     db.run(slickClazzDefinitions.length.result)
 
 
-  override def insert(clazz: ClazzDefinition): Future[ClazzDefinition] = {
+  override def create(clazz: ClazzDefinition): Future[ClazzDefinition] = {
     val insertQuery = slickClazzDefinitions.returning(slickClazzDefinitions.map(_.id)).into((clazzDB, id) => clazzDB.copy(id = id))
-    val objToInsert = DBClazzDefinition(None, asTimestamp(clazz.startFrom), asTimestamp(clazz.endAt), asTimestamp(clazz.activeFrom),asTimestamp(clazz.activeTill), clazz.name, clazz.recurrence+"", clazz.contingent, new Timestamp(System.currentTimeMillis), new Timestamp(System.currentTimeMillis),clazz.avatarurl,clazz.description,clazz.tags, None, clazz.idStudio)
+    val objToInsert = DBClazzDefinition(None, asTimestamp(clazz.startFrom), asTimestamp(clazz.endAt), asTimestamp(clazz.activeFrom),asTimestamp(clazz.activeTill), clazz.name, clazz.recurrence+"", clazz.contingent, new Timestamp(System.currentTimeMillis), new Timestamp(System.currentTimeMillis),clazz.avatarurl,clazz.description,clazz.tags, None, clazz.idStudio.get)
     val action = insertQuery += objToInsert
     db.run(action).map(_ => clazz.copy(id = objToInsert.id))
   }
 
 
   override def listActive(): Future[Seq[ClazzDefinition]] = {
-    val seeInAdvanceDays = Play.application().configuration().getString("days.see.clazzes.in.advance").toInt
-    val nowRew: Calendar = new GregorianCalendar()
-      nowRew.add(Calendar.DAY_OF_YEAR,seeInAdvanceDays)
-    val now = new Timestamp(nowRew.getTimeInMillis)
+    val now = new Timestamp(System.currentTimeMillis())
     val query =
       for {
         clazz <- slickClazzDefinitions if clazz.activeFrom <= now if clazz.activeTill >= now
@@ -67,7 +64,7 @@ class ClazzDefinitionDAOImpl @Inject() (protected val dbConfigProvider: Database
     val result = db.run(query.result)
     result.map { clazz =>
       clazz.map {
-        case (clazz) => ClazzDefinition(clazz.id, asCalendar(clazz.startFrom), asCalendar(clazz.endAt), asCalendar(clazz.activeFrom), asCalendar(clazz.activeTill), Recurrence.withName(clazz.recurrence), clazz.name, clazz.contingent, clazz.avatarurl, clazz.description, clazz.tags, clazz.idStudio)
+        case (clazz) => ClazzDefinition(clazz.id, asCalendar(clazz.startFrom), asCalendar(clazz.endAt), asCalendar(clazz.activeFrom), asCalendar(clazz.activeTill), Recurrence.withName(clazz.recurrence), clazz.name, clazz.contingent, clazz.avatarurl, clazz.description, clazz.tags, Some(clazz.idStudio))
       }
     }
   }
@@ -95,7 +92,7 @@ class ClazzDefinitionDAOImpl @Inject() (protected val dbConfigProvider: Database
       clazz.map {
         // go through all the DBClazzes and map them to Clazz
         case (studio, clazz) => {
-          ClazzDefinition(clazz.id, asCalendar(clazz.startFrom), asCalendar(clazz.endAt), asCalendar(clazz.activeFrom), asCalendar(clazz.activeTill), Recurrence.withName(clazz.recurrence), clazz.name, clazz.contingent, clazz.avatarurl, clazz.description, clazz.tags, clazz.idStudio)
+          ClazzDefinition(clazz.id, asCalendar(clazz.startFrom), asCalendar(clazz.endAt), asCalendar(clazz.activeFrom), asCalendar(clazz.activeTill), Recurrence.withName(clazz.recurrence), clazz.name, clazz.contingent, clazz.avatarurl, clazz.description, clazz.tags, Some(clazz.idStudio))
         }
       } // The result is Seq[Clazz] flapMap (works with Clazz) these to Page
     }.flatMap (c3 => totalRows.map (rows => PageClazzDefinition(c3, page, offset.toLong, rows.toLong)))

@@ -60,19 +60,19 @@ BEGIN
       'Alexander','Schamne', '0791112233','0312223333','alexander.schamne@gmail.com','https://lh3.googleusercontent.com/-tIf-c0HRvWo/AAAAAAAAAAI/AAAAAAAAAHc/sgaIELQzwcQ/photo.jpg',
       'Gesellschaftsstrasse 73','3012','Bern','Bern','Switzerland','46.954995','7.432121',
       'Alex Outdoor Crossfit','Crossfit',lorem_ipsum, 'http://www.leoneacademy.ch/wp-content/uploads/2013/02/logo.gif',
-      '2014-09-23 14:00:00.000000','2250-09-23 15:00:00.000000','2015-10-10 14:00:00.000000','2015-10-10 15:00:00.000000','Calistenics 4 All','ONETIME','20','https://www.ywcampls.org/_asset/x953xn/Fitness-page-image.jpg', lorem_ipsum
+      '2014-09-23 14:00:00.000000','2250-09-23 15:00:00.000000','2015-10-10 14:00:00.000000','2015-10-10 15:00:00.000000','Calistenics 4 All','onetime','20','https://www.ywcampls.org/_asset/x953xn/Fitness-page-image.jpg', lorem_ipsum
     ),
       (
       'Stefan','Waldner','0791112233','0312223333','stefan@leone.ch','http://www.leoneacademy.ch/wp-content/uploads/2013/02/stefu_001.jpg',
       'Hallerstrasse 1','3012','Bern','Bern','Switzerland', '46.951679', '7.434954',
       'Leone Academy','Kickboxen',lorem_ipsum,'http://www.leoneacademy.ch/wp-content/uploads/2013/02/logo.gif',
-      '2015-09-28 17:00:00.000000','2217-09-27 17:45:00.000000','2015-09-28 17:00:00.000000','2015-09-28 17:45:00.000000','Sandsack','WEEKLY','3','https://www.ywcampls.org/_asset/x953xn/Fitness-page-image.jpg', lorem_ipsum
+      '2015-09-28 17:00:00.000000','2217-09-27 17:45:00.000000','2015-09-28 17:00:00.000000','2015-09-28 17:45:00.000000','Sandsack','weekly','3','https://www.ywcampls.org/_asset/x953xn/Fitness-page-image.jpg', lorem_ipsum
     ),
       (
       'Andreas','Bolt','0791112233','0312223333','andreas.bolt@gmail.com','https://bern.emchberger.ch/sites/default/files/styles/132x174sc/public/bolt_andreas_web.jpg',
       'Speichergasse 4','3011','Bern','Bern','Switzerland', '46.950300', '7.442698',
       'Bolt Muscle Gym','Crossfit',lorem_ipsum, 'http://www.leoneacademy.ch/wp-content/uploads/2013/02/logo.gif',
-      '2015-10-05 17:00:00.000000','2218-09-27 17:45:00.000000','2015-09-25 16:00:00.000000','2015-09-25 17:30:00.000000', 'Crossfit','WEEKLY','3','https://www.ywcampls.org/_asset/x953xn/Fitness-page-image.jpg', lorem_ipsum);
+      '2015-10-05 17:00:00.000000','2218-09-27 17:45:00.000000','2015-09-25 16:00:00.000000','2015-09-25 17:30:00.000000', 'Crossfit','weekly','3','https://www.ywcampls.org/_asset/x953xn/Fitness-page-image.jpg', lorem_ipsum);
 
   select count(*) into nr_of_partners from temp;
 

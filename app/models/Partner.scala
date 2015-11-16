@@ -1,6 +1,6 @@
 package models
 
-import java.util.UUID
+import java.util.{Calendar, UUID}
 
 import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
 
@@ -18,15 +18,16 @@ case class Partner(
                     phone: Option[String] = None,
                     email: Option[String] = None,
                     emailVerified: Boolean = false,
-                    createdOn: java.sql.Timestamp,
-                    updatedOn: java.sql.Timestamp,
+                    createdOn: Calendar,
+                    updatedOn: Calendar,
                     ptoken: Option[String] = None,
                     isActive: Boolean = true,
                     inactiveReason: Option[String] = None,
                     username: Option[String] = None,
                     fullname: Option[String] = None,
                     avatarurl: Option[String] = None,
-                    address: Address) extends Identity
+                    address: Address,
+                    studio: Studio) extends Identity
 
 
 /**
@@ -34,16 +35,8 @@ case class Partner(
  */
 object Partner {
 
-  implicit object timestampFormat extends Format[Timestamp] {
-    val format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS'Z'")
 
-    def reads(json: JsValue) = {
-      val str = json.as[String]
-      JsSuccess(new Timestamp(format.parse(str).getTime))
-    }
-
-    def writes(ts: Timestamp) = JsString(format.format(ts))
-  }
+  import utils.Utils.Implicits._
 
   /**
    * Converts the [Partner] object to Json and vice versa.

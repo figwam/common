@@ -3,11 +3,19 @@ package models
 import java.util.{Calendar, UUID}
 
 import models.Recurrence.Recurrence
+import models.Type.Type
+
 import play.api.libs.json._
 
 object Recurrence extends Enumeration {
   type Recurrence = Value
-  val ONETIME, WEEKLY = Value
+  val onetime, weekly = Value
+}
+
+
+object Type extends Enumeration {
+  type Type = Value
+  val aerobic, boxen, kickboxen, crossfit, gymnastic, yoga, parcour, mma, thaiboxen, dance = Value
 }
 
 case class ClazzDefinition(
@@ -22,7 +30,7 @@ case class ClazzDefinition(
                   avatarurl: Option[String] = None,
                   description: String,
                   tags: Option[String],
-                  idStudio: UUID)
+                  idStudio: Option[UUID])
 
 
 /**

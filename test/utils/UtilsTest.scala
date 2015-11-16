@@ -29,9 +29,9 @@ class UtilsTest extends FeatureSpec with GivenWhenThen {
     val seeInAdvanceDays = 16
 
     // weekly
-    val clazzDef = ClazzDefinition(Some(UUID.randomUUID()), startFrom, endAt, activeFrom, activeTill, Recurrence.WEEKLY, "Test Gym", 5, "http://avatar", "Super gym description", Some("Crossfit"), UUID.randomUUID())
+    val clazzDef = ClazzDefinition(Some(UUID.randomUUID()), startFrom, endAt, activeFrom, activeTill, Recurrence.weekly, "Test Gym", 5, "http://avatar", "Super gym description", Some("Crossfit"), UUID.randomUUID())
     // onetime
-    val clazzDefOnce = ClazzDefinition(Some(UUID.randomUUID()), startFrom, endAt, activeFrom, activeTill, Recurrence.ONETIME, "Test Gym", 5, "http://avatar", "Super gym description", Some("Crossfit"), UUID.randomUUID())
+    val clazzDefOnce = ClazzDefinition(Some(UUID.randomUUID()), startFrom, endAt, activeFrom, activeTill, Recurrence.onetime, "Test Gym", 5, "http://avatar", "Super gym description", Some("Crossfit"), UUID.randomUUID())
 
     scenario("Partner creates a clazz definition weekly currently active") {
 
