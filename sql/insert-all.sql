@@ -48,6 +48,8 @@ DECLARE
   nr_of_partners int;
   partner temp;
 
+  sid uuid;
+
 BEGIN
 
   INSERT INTO temp (firstname, lastname, mobile, phone, email, partner_avatarurl,
@@ -82,7 +84,10 @@ BEGIN
   END LOOP;
 
   -- Angebote auf dem Portal
-  INSERT INTO offer(id, name,nr_access,price, price_timestop) VALUES ('e4011d11-208f-4495-837c-ede2be5918dd','small',4,59,9),('3eb69ea1-8a74-4147-9eb1-4aa43dc0b96a','medium',6,89,9),('cc131560-6678-4f5a-8765-8e30ca96fd04','large',8,119,9);
+  INSERT INTO offer(id, name,nr_access,price, price_timestop)
+    VALUES  ('e4011d11-208f-4495-837c-ede2be5918dd','small',4,59,9),
+            ('3eb69ea1-8a74-4147-9eb1-4aa43dc0b96a','medium',6,89,9),
+            ('cc131560-6678-4f5a-8765-8e30ca96fd04','large',8,119,9);
 
   --INSERT PARTNERS
   FOR i IN 1..nr_of_partners LOOP
@@ -162,6 +167,16 @@ BEGIN
         SELECT id, 59, 4.72, NOW(), current_timestamp + 1 * interval '1 month', NOW(), 'transaction_id_1234', 'paid'
         FROM sub01;
   END LOOP;
+
+
+  select s.id into sid from partner p, studio s where p.id = s.id_partner limit 1;
+
+  FOR i IN 1..10 LOOP
+    SELECT * INTO partner FROM temp WHERE id = ((i % nr_of_partners)+1);
+    INSERT INTO clazz_definition (id_studio, active_from, active_till, start_from, end_at, name, recurrence,  contingent, avatarurl, description)
+    VALUES (sid, partner.active_from,partner.active_till,partner.start_from,partner.end_at,partner.clazzdef_name,partner.recurrence,partner.contingent,partner.clazz_def_avatarurl, partner.clazzdef_description);
+  END LOOP;
+
 END;
 $$;
 

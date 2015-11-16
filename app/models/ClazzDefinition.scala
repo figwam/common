@@ -19,7 +19,7 @@ case class ClazzDefinition(
                   recurrence: Recurrence,
                   name: String,
                   contingent: Short,
-                  avatarurl: String,
+                  avatarurl: Option[String] = None,
                   description: String,
                   tags: Option[String],
                   idStudio: UUID)
@@ -35,5 +35,6 @@ object ClazzDefinition {
   /**
    * Converts the [Clazz] object to Json and vice versa.
    */
-  implicit val jsonFormat = Json.format[Clazz]
+  implicit val jsonFormat = Json.format[ClazzDefinition]
+
 }

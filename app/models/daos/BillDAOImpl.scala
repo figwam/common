@@ -27,7 +27,7 @@ class BillDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvid
 
   override def listBySubscriptionId(idSubscription: UUID): Future[List[Bill]] = {
     val q = for {
-      b <- slickBills.filter(_.idSubscription === idSubscription)
+      b <- slickBills.filter(_.idSubscription === idSubscription).sortBy(_.periodStart)
     } yield b
 
     db.run(q.result).map{ bills =>

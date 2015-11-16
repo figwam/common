@@ -22,28 +22,34 @@ trait ClazzDefinitionDAO  {
   //  def findById(id: Long): Future[ClazzDefinition]
   def count: Future[Int]
 
+  /**
+    * Lists all clazz definitions
+    *
+    * @param page
+    * @param pageSize
+    * @param orderBy
+    * @param idPartner
+    * @return
+    */
+  def listByPartner(page: Int = 0, pageSize: Int = 10, orderBy: Int = 1, idPartner: UUID): Future[PageClazzDefinition]
+
 }
 
 class ClazzDefinitionDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
   extends ClazzDefinitionDAO with DAOSlick {
   import driver.api._
 
-  /**
-   * Count employees with a filter
-   */
   private def count(filter: String): Future[Int] =
     db.run(slickClazzDefinitions.filter(_.name.toLowerCase like filter.toLowerCase).length.result)
 
-  /**
-   * Count clazzes
-   */
+
   override def count: Future[Int] =
     db.run(slickClazzDefinitions.length.result)
 
 
   override def insert(clazz: ClazzDefinition): Future[ClazzDefinition] = {
     val insertQuery = slickClazzDefinitions.returning(slickClazzDefinitions.map(_.id)).into((clazzDB, id) => clazzDB.copy(id = id))
-    val objToInsert = DBClazzDefinition(None, asTimestamp(clazz.startFrom), asTimestamp(clazz.endAt), asTimestamp(clazz.activeFrom),asTimestamp(clazz.activeTill), clazz.name, clazz.recurrence+"", clazz.contingent, new Timestamp(System.currentTimeMillis), new Timestamp(System.currentTimeMillis),Some(clazz.avatarurl),clazz.description,clazz.tags, None, clazz.idStudio)
+    val objToInsert = DBClazzDefinition(None, asTimestamp(clazz.startFrom), asTimestamp(clazz.endAt), asTimestamp(clazz.activeFrom),asTimestamp(clazz.activeTill), clazz.name, clazz.recurrence+"", clazz.contingent, new Timestamp(System.currentTimeMillis), new Timestamp(System.currentTimeMillis),clazz.avatarurl,clazz.description,clazz.tags, None, clazz.idStudio)
     val action = insertQuery += objToInsert
     db.run(action).map(_ => clazz.copy(id = objToInsert.id))
   }
@@ -61,9 +67,40 @@ class ClazzDefinitionDAOImpl @Inject() (protected val dbConfigProvider: Database
     val result = db.run(query.result)
     result.map { clazz =>
       clazz.map {
-        case (clazz) => ClazzDefinition(clazz.id, asCalendar(clazz.startFrom), asCalendar(clazz.endAt), asCalendar(clazz.activeFrom), asCalendar(clazz.activeTill), Recurrence.withName(clazz.recurrence), clazz.name, clazz.contingent, clazz.avatarurl.get, clazz.description, clazz.tags, clazz.idStudio)
+        case (clazz) => ClazzDefinition(clazz.id, asCalendar(clazz.startFrom), asCalendar(clazz.endAt), asCalendar(clazz.activeFrom), asCalendar(clazz.activeTill), Recurrence.withName(clazz.recurrence), clazz.name, clazz.contingent, clazz.avatarurl, clazz.description, clazz.tags, clazz.idStudio)
       }
     }
+  }
+
+  private def countByPartner(idPartner: UUID): Future[Int] = {
+    val action = (for {
+      studio <- slickStudios.filter(_.idPartner === idPartner)
+      clazzDef <- slickClazzDefinitions.filter(_.idStudio === studio.id)
+    } yield ())
+    db.run(action.length.result)
+  }
+
+  override def listByPartner(page: Int = 0, pageSize: Int = 10, orderBy: Int = 1, idPartner: UUID): Future[PageClazzDefinition] = {
+    val offset = if (page > 0) pageSize * page else 0
+
+    val action = (for {
+      studio <- slickStudios.filter(_.idPartner === idPartner)
+      clazzDef <- slickClazzDefinitions.filter(_.idStudio === studio.id)
+    } yield (studio, clazzDef)).drop(offset).take(pageSize)
+    val totalRows = countByPartner(idPartner)
+
+
+    val result = db.run(action.result)
+    result.map { clazz =>
+      clazz.map {
+        // go through all the DBClazzes and map them to Clazz
+        case (studio, clazz) => {
+          ClazzDefinition(clazz.id, asCalendar(clazz.startFrom), asCalendar(clazz.endAt), asCalendar(clazz.activeFrom), asCalendar(clazz.activeTill), Recurrence.withName(clazz.recurrence), clazz.name, clazz.contingent, clazz.avatarurl, clazz.description, clazz.tags, clazz.idStudio)
+        }
+      } // The result is Seq[Clazz] flapMap (works with Clazz) these to Page
+    }.flatMap (c3 => totalRows.map (rows => PageClazzDefinition(c3, page, offset.toLong, rows.toLong)))
+
+
   }
 
 }

@@ -10,7 +10,7 @@ import org.joda.time.{DateTimeZone, DateTime}
 import models.Recurrence.Recurrence
 import models._
 import play.Logger
-import play.api.libs.json.{JsString, JsSuccess, JsValue, Format}
+import play.api.libs.json._
 
 import scala.collection.mutable.ListBuffer
 
@@ -52,6 +52,7 @@ object Utils {
       }
       def writes(r: Recurrence) = JsString(r+"")
     }
+
   }
 
   final def calculatePeriods(createdOn: Calendar) : List[Period] = {
@@ -91,7 +92,7 @@ object Utils {
     }
 
 
-    val clazz  = Clazz(None, clazzDef.startFrom,clazzDef.endAt, clazzDef.name, clazzDef.contingent, Some(clazzDef.avatarurl), clazzDef.description, clazzDef.tags, 0, "",clazzDef.id.get, null, None)
+    val clazz  = Clazz(None, clazzDef.startFrom,clazzDef.endAt, clazzDef.name, clazzDef.contingent, clazzDef.avatarurl, clazzDef.description, clazzDef.tags, 0, "",clazzDef.id.get, null, None)
     List(
     // activ bis muss in zukunft liegen ODER
     // activ von muss vor calculateTill

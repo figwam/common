@@ -25,6 +25,9 @@ case class PageClazzDefinition(items: Seq[ClazzDefinition], page: Int, offset: L
   lazy val next = Option(page + 1).filter(_ => (offset + items.size) < total)
 }
 
+
+object PageClazzDefinition {implicit val jsonFormat = Json.format[PageClazzDefinition]}
+
 object Page {
   /*
   implicit def searchResultsReads[T](implicit fmt: Reads[T]): Reads[Page[T]] = new Reads[Page[T]] {

@@ -44,7 +44,7 @@ trait ClazzDAO  {
    * @return
    */
   def listPersonalizedMy(page: Int = 0, pageSize: Int = 10, orderBy: Int = 1, filter: String = "%", idTrainee: UUID, startFrom: Timestamp, endAt: Timestamp): Future[Page]
-  //  def findById(id: Long): Future[Clazz]
+
   def count: Future[Int]
 
 }
