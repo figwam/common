@@ -127,6 +127,17 @@ class ClazzDAOImpl @Inject() (protected val dbConfigProvider: DatabaseConfigProv
       clazz1 <- slickClazzes.filter(_.id === reg.idClazz)
     } yield (reg))
 
+    /*
+    val clazzViewsAction = (for {
+      c <- slickClazzViews
+        .sortBy(r => orderBy match {case 1 => r.startFrom case _ => r.startFrom})
+        .filter(_.startFrom >= new Timestamp(System.currentTimeMillis()))
+        .filter(_.searchMeta.toLowerCase like filter.toLowerCase)
+      s <- slickStudios.filter(_.id === c.idStudio)
+      a <- slickAddresses.filter(_.id === s.idAddress)
+    } yield (c,a))
+    */
+
 
     val clazzAction = (for {
       (registration, clazz) <- regAction joinRight slickClazzViews
