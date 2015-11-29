@@ -278,6 +278,14 @@ CREATE TABLE public.clazz_definition(
   deleted_on timestamp
 );
 
+-- TODO
+-- Partner Contract
+-- ClazzDef Address (maxPriceClazz [3 Kategorien], revenueSingle %, revenueAbo CHF)
+-- Anmelden sollte eine email auslösen (Vielen Dank für Ihre buchung Template)
+-- Bis x Stunden vor dem Kurs Anmeldung möglich
+-- Geld wird sofort abgebucht
+-- Partner muss uns jeden Monat eine Rechnung stellen (könnte automatisch über Partner Tool erfolgen)
+
 -- ALTER TABLE public.clazz DROP CONSTRAINT IF EXISTS studio_fk CASCADE;
 ALTER TABLE public.clazz_definition ADD CONSTRAINT studio_fk FOREIGN KEY (id_studio)
 REFERENCES public.studio (id) MATCH FULL
@@ -705,7 +713,9 @@ CREATE VIEW clazz_view AS
   select c.id, c.start_from, c.end_at, cd.name, cd.contingent,
     cd.avatarurl, cd.description, cd.tags,
     concat('{',cd.name,'},',
-           '{',s.name,'},',
+					 '{',s.name,'},',
+					 '{',adrS.city,'},',
+					 '{',adrS.zip,'},',
            '{',cd.description,'},',
            '{',cd.tags,'}') as search_meta, nr_of_regs,
     cd.id AS id_clazzdef, s.id AS id_studio
@@ -715,9 +725,10 @@ CREATE VIEW clazz_view AS
            count(r.id_clazz) as nr_of_regs
          from clazz c
            left join registration r on r.id_clazz = c.id
-         group by c.id) as c, clazz_definition cd, studio s
+         group by c.id) as c, clazz_definition cd, studio s, address adrS
   where c.id_clazzdef = cd.id
-        and cd.id_studio = s.id;
+        and cd.id_studio = s.id
+				and s.id_address = adrS.id;
 
 
 -- # --- !Downs

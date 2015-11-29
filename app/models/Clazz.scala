@@ -18,7 +18,8 @@ case class Clazz(
                   searchMeta: String,
                   idClazzDef: UUID,
                   idStudio: UUID,
-                  idRegistration: Option[UUID])
+                  idRegistration: Option[UUID],
+                  studio: Option[Studio] = None)
 
 
 /**

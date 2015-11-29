@@ -14,6 +14,36 @@ import scala.concurrent.Future
 import utils.Utils._
 
 /**
+  * Give access to the trainee object.
+  */
+trait TraineeDAO {
+
+  /**
+    * Finds a trainee by its login info.
+    *
+    * @param loginInfo The login info of the trainee to find.
+    * @return The found trainee or None if no trainee for the given login info could be found.
+    */
+  def find(loginInfo: LoginInfo): Future[Option[Trainee]]
+
+  /**
+    * Saves a trainee.
+    *
+    * @param trainee The trainee to save.
+    * @return The saved trainee.
+    */
+  def save(trainee: Trainee): Future[Trainee]
+
+  /**
+    * Updates a trainee.
+    *
+    * @param trainee The trainee to update.
+    * @return The updated trainee.
+    */
+  def update(trainee: Trainee): Future[Trainee]
+}
+
+/**
  * Give access to the trainee object using Slick
  */
 class TraineeDAOImpl @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
